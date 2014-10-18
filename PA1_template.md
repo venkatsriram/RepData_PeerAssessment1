@@ -151,7 +151,7 @@ ggplot(nafilledactivity, aes(x=date, y=steps)) +
      labs(x="Days", y="Steps", title="Total (NA Filled) Steps/Day")
 ```
 
-![plot of chunk histogram_nafilled_totaldailysteps](figure/histogram_nafilled_totaldailysteps.png) 
+![plot of chunk histogram_nafill_totaldailysteps](figure/histogram_nafill_totaldailysteps.png) 
 
 ##### 4) Mean and Median total number of steps taken per day for `NA filled` dataset displayed in HTML format
 

@@ -109,7 +109,7 @@ nafilled_missingvalues
 
 ##### 4) Histogram of the total number of steps for `NA filled` dataset
 
-```{r "histogram_nafilled_totaldailysteps"}
+```{r "histogram_nafill_totaldailysteps"}
 library(ggplot2)
 par(mai=c(1,1,1,1))
 ggplot(nafilledactivity, aes(x=date, y=steps)) + 
