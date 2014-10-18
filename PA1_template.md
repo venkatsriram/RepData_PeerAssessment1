@@ -1,4 +1,9 @@
-# Reproducible Research: Peer Assessment 1
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
 
 
 ```r
@@ -12,7 +17,7 @@ opts_chunk$set(warning=FALSE, fig.height=4, fig.width=8, fig.path="figure/")
 
 
 ```r
-zipfile <- "activity.zip"
+zipfile <- list.files(path=".", pattern="*.zip")
 if (file.exists(zipfile)) {
         zipname <- unzip(zipfile, list=TRUE)
         unzip(zipfile)
@@ -47,20 +52,17 @@ ggplot(activity, aes(x=date, y=steps)) +
 
 
 ```r
-library(xtable)
 meansteps <- mean(rowsum(activity$steps, activity$date), na.rm=TRUE)
 mediansteps <- median(rowsum(activity$steps, activity$date), na.rm=TRUE)
 statdf <- data.frame(cbind(meansteps, mediansteps))
 names(statdf) <- c("mean", "median")
-print(xtable(statdf), type="html", include.rownames=FALSE)
+statdf
 ```
 
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat Oct 18 13:52:29 2014 -->
-<table border=1>
-<tr> <th> mean </th> <th> median </th>  </tr>
-  <tr> <td align="right"> 10766.19 </td> <td align="right"> 10765.00 </td> </tr>
-   </table>
+```
+##       mean median
+## 1 10766.19  10765
+```
 
 ## What is the average daily activity pattern?
 
@@ -82,23 +84,35 @@ ggplot(activity, aes(x=interval, y=steps)) +
 
 
 ```r
-library(xtable)
-t <- aggregate(steps ~ interval, data=activity, FUN="mean")
-maxstepsdf <- data.frame(t[which.max(t$steps),]$interval)
-names(maxstepsdf) <- c("Interval with Max Steps")
-print(xtable(maxstepsdf), type="html", include.rownames=FALSE)
+tmp <- aggregate(steps ~ interval, data=activity, FUN=mean)
+maxsteps <- tmp[which.max(tmp$steps),]$steps
+maxstepsintl <- tmp[which.max(tmp$steps),]$interval
+maxstepsintl_rng <- paste(maxstepsintl-5, maxstepsintl, sep=" to ")
+maxsteps_lowtm <- paste((maxstepsintl-5) %/% 100, (maxstepsintl-5) %% 100, sep=":")
+maxsteps_uptm <- paste(maxstepsintl %/% 100, maxstepsintl %% 100, sep=":")
+maxstepstm_rng <- paste(maxsteps_lowtm, maxsteps_uptm, sep=" to ")
+resdf <- data.frame(cbind(maxsteps, maxstepsintl_rng, maxstepstm_rng))
+names(resdf) <- c("Max Steps", "Interval", "Interval H:MM")
+resdf
 ```
 
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat Oct 18 13:52:30 2014 -->
-<table border=1>
-<tr> <th> Interval with Max Steps </th>  </tr>
-  <tr> <td align="right"> 835 </td> </tr>
-   </table>
+```
+##          Max Steps   Interval Interval H:MM
+## 1 206.169811320755 830 to 835  8:30 to 8:35
+```
 
 ## Imputing missing values
 
 ##### 1) Total number of missing values in the dataset (i.e. the total number of rows with NAs) is `2304`
+
+```r
+missingvalues <- sum(is.na(activity$steps))
+missingvalues
+```
+
+```
+## [1] 2304
+```
 
 ##### 2) Create a data frame that will contain steps at 5 minute interval mean across all days
 
@@ -115,7 +129,16 @@ tmpdf <- merge(activity, intervalmean, by="interval")
 nafilledactivity <- transform(tmpdf, steps=ifelse(is.na(steps.x), steps.y, steps.x))[c(5,3,1)]
 ```
 
-**- Total number of missing values in the `NA filled` dataset (i.e. the total number of rows with NAs) is `0`**
+##### - Total number of missing values in the `NA filled` dataset (i.e. the total number of rows with NAs) is `0`
+
+```r
+nafilled_missingvalues <- sum(is.na(nafilledactivity$steps))
+nafilled_missingvalues
+```
+
+```
+## [1] 0
+```
 
 ##### 4) Histogram of the total number of steps for `NA filled` dataset
 
@@ -125,7 +148,7 @@ library(ggplot2)
 par(mai=c(1,1,1,1))
 ggplot(nafilledactivity, aes(x=date, y=steps)) + 
      geom_histogram(stat="identity") + 
-     labs(x="Days", y="Steps", title="Total Steps/Day")
+     labs(x="Days", y="Steps", title="Total (NA Filled) Steps/Day")
 ```
 
 ![plot of chunk histogram_nafilled_totaldailysteps](figure/histogram_nafilled_totaldailysteps.png) 
@@ -134,22 +157,17 @@ ggplot(nafilledactivity, aes(x=date, y=steps)) +
 
 
 ```r
-library(xtable)
 nafilledmeansteps <- mean(rowsum(nafilledactivity$steps, nafilledactivity$date))
 nafilledmediansteps <- median(rowsum(nafilledactivity$steps, nafilledactivity$date))
 nafilledstatdf <- data.frame(cbind(nafilledmeansteps, nafilledmediansteps))
 names(nafilledstatdf) <- c("mean", "median")
-print(xtable(nafilledstatdf), type="html", include.rownames=FALSE)
+nafilledstatdf
 ```
 
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat Oct 18 13:52:31 2014 -->
-<table border=1>
-<tr> <th> mean </th> <th> median </th>  </tr>
-  <tr> <td align="right"> 10766.19 </td> <td align="right"> 10766.19 </td> </tr>
-   </table>
-
-##  
+```
+##       mean   median
+## 1 10766.19 10766.19
+```
 
 ##### 4) The values between the `activity (original)` dataset and the `nafilledactivity (new)` dataset differ as shown in the table below.
 
@@ -157,17 +175,13 @@ print(xtable(nafilledstatdf), type="html", include.rownames=FALSE)
 ```r
 names(statdf) <- c("Original Mean", "Original Median")
 names(nafilledstatdf) <- c("NA Filled Mean", "NA Filled Median")
-print(xtable(cbind(statdf, nafilledstatdf)), type="html", include.rownames=FALSE)
+cbind(statdf, nafilledstatdf)
 ```
 
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-<!-- Sat Oct 18 13:52:31 2014 -->
-<table border=1>
-<tr> <th> Original Mean </th> <th> Original Median </th> <th> NA Filled Mean </th> <th> NA Filled Median </th>  </tr>
-  <tr> <td align="right"> 10766.19 </td> <td align="right"> 10765.00 </td> <td align="right"> 10766.19 </td> <td align="right"> 10766.19 </td> </tr>
-   </table>
-
-##  
+```
+##   Original Mean Original Median NA Filled Mean NA Filled Median
+## 1      10766.19           10765       10766.19         10766.19
+```
 
 ##### 4) The impact of imputing the missing data by the mean of 5 minute interval across all days  
 
