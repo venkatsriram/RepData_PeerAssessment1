@@ -9,7 +9,7 @@ output:
 ```r
 library(knitr)
 options(digits=7)
-opts_chunk$set(warning=FALSE, fig.height=4, fig.width=8, fig.path="figure/")
+opts_chunk$set(warning=FALSE, fig.height=4, fig.width=10, fig.path="figure/")
 ```
 
 ## Loading and preprocessing the data
